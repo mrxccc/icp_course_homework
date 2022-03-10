@@ -3,10 +3,6 @@
     "Microblog": {
       "main": "src/Microblog/main.mo",
       "type": "motoko"
-    },
-    "Microblog2": {
-      "main": "src/Microblog/main.mo",
-      "type": "motoko"
     }
   },
   "defaults": {
