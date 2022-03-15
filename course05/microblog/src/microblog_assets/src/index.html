@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>microblog</title>
+    <base href="/" />
+    <link rel="icon" href="favicon.ico" />
+    <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
+    <link type="text/css" rel="stylesheet" href="main.css" />
+  </head>
+  <body>
+    <header><h1>Microblog</h1></header>
+    <main>
+      <label for="message">write something!!</label>
+      <textarea id="message" ></textarea>
+      <label for="otp">OTP</label>
+      <br>
+      <input id="otp"></input>
+      <button id="post">Post</button>
+      <span id="error" style="color: red;"></span>
+      <br>
+      <label>关注列表</label>
+      <section id="follows"></section>
+
+      <label>消息列表</label>
+      <!-- 主要内容部分 -->
+      <div class="timeline-small">
+        <div class="timeline-small-body">
+            <ul id="mylist">
+              <!-- <li>
+                  <div class="bullet pink"></div>
+                  <div class="date">XXXX年XX月XX日</div>
+                  <div class="desc">
+                      <h3>内容段落1</h3>
+                      <h4>内容段落2内容段落2内容段落2内容段落2</h4>
+                  </div>
+              </li> -->
+            </ul>
+        </div>
+      </div>
+      <div id="postList"></div>
+      <section id="posts"></section>
+
+    </main>
+  </body>
+</html>
