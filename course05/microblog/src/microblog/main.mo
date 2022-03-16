@@ -16,10 +16,10 @@ actor {
         unfollow : shared(Principal) -> async (); // 取消关注对象
         follows: shared query() -> async [Principal]; // 返回关注列表
         post: shared(otp: Text, text: Text) -> async ();// 发布新消息
-        posts: shared query(since: Time.Time) -> async [Message]; // 返回所有发布的消息
-        timeline: shared (since: Time.Time) -> async [Message]; // 返回所有关注对象发布的消息
-        get_name: shared () -> async Text; // 获取作者名字
-        set_name: shared (name : Text) -> async (); // 设置作者名字
+        posts: shared query (since: Time.Time) -> async [Message]; // 返回所有发布的消息
+        timeline: shared query(since: Time.Time) -> async [Message]; // 返回所有关注对象发布的消息
+        get_name: shared query() -> async Text; // 获取作者名字
+        set_name: shared query(name : Text) -> async (); // 设置作者名字
     };
 
     // 关注列表

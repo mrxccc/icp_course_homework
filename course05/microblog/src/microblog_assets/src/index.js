@@ -1,19 +1,10 @@
-import { microblog } from "../../declarations/microblog";
-import {Actor, HttpAgent} from "@dfinity/agent"
-import { idlFactory as microblog_idl, canisterId as microblog_id } from "../../declarations/microblog";
+import { createActor, microblog } from "../../declarations/microblog";
 import { Principal } from "@dfinity/principal";
 import Moment from 'moment'
-
-const agent = new HttpAgent();
-const proxy = (canisterId) => {
-  const blog = Actor.createActor(microblog_idl, {agent, canisterId})
-  return blog
-} 
 
 const sortDesc = (a, b) => -Number(a.time - b.time)
 
 var followsList = [];
-
 // 关注
 async function follow(){
   let follow_button = document.getElementById("follow")
@@ -59,8 +50,9 @@ async function getPosts(pid, author){
   let actor = createActor(pid)
   let list =  await actor.posts(123)
   document.getElementById("authorLable").innerText = author
-  followsMsgList = list
-  refreshTimeLineList("msgList")
+  var followsMsgList = list
+  followsMsgList.sort(sortDesc)
+  refreshTimeLineList("msgList", followsMsgList)
 }
 
 // 获取所有关注对象消息列表
@@ -85,11 +77,15 @@ async function myPost(){
 // 获取关注列表
 async function load_follows(){
   let follows = await microblog.follows()
+  console.log(follows)
   followsList = []
-  for(var i= 0; i< follows.length;i++){
+  for(var i= 0; i < follows.length; i++){
     // 实时查author
-    let name = await proxy(follows[i]).get_name()
-    followsList.push({"pid": follows[i].toText(), "author": name})
+    await createActor(follows[i]).get_name()
+    .then(name => {
+      console.log(name)
+      followsList.push({"pid": follows[i].toText(), "author": name})
+    })
   }
   console.log(followsList)
   refreshFollowsList()
