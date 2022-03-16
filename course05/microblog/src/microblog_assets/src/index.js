@@ -5,6 +5,26 @@ import Moment from 'moment'
 const sortDesc = (a, b) => -Number(a.time - b.time)
 
 var followsList = [];
+
+// 发布文章
+async function post(){
+  let post_button = document.getElementById("post")
+  let postError = document.getElementById("postError")
+  post_button.disabled = true
+  postError.innerText = ""
+  let texarea = document.getElementById("message")
+  let otp = document.getElementById("otp").value
+  let text = texarea.value;
+  try{
+     await microblog.post(otp, text)
+     texarea.value = ""
+  } catch (err){
+    console.log(err)
+    error.innerText = "Post Failed";
+  }
+  post_button.disabled = false
+}
+
 // 关注
 async function follow(){
   let follow_button = document.getElementById("follow")
@@ -48,11 +68,15 @@ async function unfollow(){
 // 获取指定author对象的消息
 async function getPosts(pid, author){
   let actor = createActor(pid)
-  let list =  await actor.posts(123)
-  document.getElementById("authorLable").innerText = author
-  var followsMsgList = list
-  followsMsgList.sort(sortDesc)
-  refreshTimeLineList("msgList", followsMsgList)
+  actor.posts(123).then(list => {
+    document.getElementById("authorLable").innerText = author
+    var followsMsgList = list
+    followsMsgList.sort(sortDesc)
+    refreshTimeLineList("msgList", followsMsgList)
+  }).catch(err => {
+    console.log("catch: ", err);
+  })
+  
 }
 
 // 获取所有关注对象消息列表
@@ -67,28 +91,35 @@ async function allPost(){
 async function myPost(){
   let myPost_btn = document.getElementById("myPost");
   myPost_btn.disabled = true
-  let posts = await microblog.posts(123);
-  var followsMsgList = posts
-  followsMsgList.sort(sortDesc)
-  refreshTimeLineList("myPostList", followsMsgList)
-  myPost_btn.disabled = false
+  microblog.posts(123).then(posts => {
+    var followsMsgList = posts
+    followsMsgList.sort(sortDesc)
+    refreshTimeLineList("myPostList", followsMsgList)
+    myPost_btn.disabled = false
+  }).catch(err => {
+    console.log("catch: ", err);
+    myPost_btn.disabled = false
+  })
 }
 
 // 获取关注列表
 async function load_follows(){
   let follows = await microblog.follows()
-  console.log(follows)
-  followsList = []
-  for(var i= 0; i < follows.length; i++){
-    // 实时查author
-    await createActor(follows[i]).get_name()
-    .then(name => {
-      console.log(name)
-      followsList.push({"pid": follows[i].toText(), "author": name})
-    })
+  if(follows.length>0){
+    followsList = []
+    for(var i= 0; i < follows.length; i++){
+      var follow = {"pid": follows[i].toText(), "author": ""}
+      // 实时查author
+      await createActor(follows[i]).get_name()
+      .then(name => {
+        follow.author = name
+      }).catch(err => {
+        console.log("catch: ", err);
+      })
+      followsList.push(follow)
+    }
+    refreshFollowsList()
   }
-  console.log(followsList)
-  refreshFollowsList()
 }
 
 // 渲染关注列表
@@ -102,10 +133,26 @@ async function refreshFollowsList(){
 
 // 获取关注对象发布的消息
 async function timeline(){
-  let posts = await microblog.timeline(123);
-  var followsMsgList = posts
-  followsMsgList.sort(sortDesc)
-  refreshTimeLineList("msgList", followsMsgList)
+  microblog.timeline(123).then(posts => {
+    var followsMsgList = posts
+    followsMsgList.sort(sortDesc)
+    refreshTimeLineList("msgList", followsMsgList)
+  })
+}
+
+async function setName(){
+  document.getElementById("setNameBtn").disabled = true
+  document.getElementById("setNameError").innerText = ""
+  let name = document.getElementById("setNameInput").value
+  let otp = document.getElementById("otp").value
+  microblog.set_name(otp, name).then(() =>{
+    alert("设置成功")
+    document.getElementById("setNameBtn").disabled = false
+  }).catch(err => {
+    console.log("catch: ", err);
+    document.getElementById("setNameError").innerText = "setname failed"
+    document.getElementById("setNameBtn").disabled = false
+  })
 }
 
 // 渲染消息列表: node是节点名称
@@ -163,6 +210,8 @@ function addFollowsNode(pid, author){
   document.getElementById("followsList").appendChild(node);
 }
 
+
+
 //加载文章消息
 function load(){
   let post_btn = document.getElementById("post");
@@ -179,6 +228,9 @@ function load(){
 
   let myPost_btn = document.getElementById("myPost");
   myPost_btn.onclick = myPost;
+
+  let setName_btn = document.getElementById("setNameBtn");
+  setName_btn.onclick = setName;
 
   setInterval(myPost, 3000);
   myPost()
