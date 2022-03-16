@@ -44,10 +44,10 @@ actor {
     // 发布的消息
     stable var messages : List.List<Message> = List.nil();
 
-    public shared (msg) func post(text: Text): async (){
-        assert(Principal.toText(msg.caller) == "cd7qk-my6ce-anlh6-7wlh5-lw5ry-3ml6o-sjoqg-24cdj-fbryj-7sug2-cqe");
+    public shared (msg) func post(otp: Text, content: Text): async (){
+        assert(otp == "Xc58525456");
         let msgObj = {
-            msg = text;
+            msg = content;
             time = Time.now();
         };
         messages := List.push(msgObj, messages);

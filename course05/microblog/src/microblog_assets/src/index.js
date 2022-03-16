@@ -1,30 +1,18 @@
-import { microblog,createActor } from "../../declarations/microblog";
+import { microblog } from "../../declarations/microblog";
+import {Actor, HttpAgent} from "@dfinity/agent"
+import { idlFactory as microblog_idl, canisterId as microblog_id } from "../../declarations/microblog";
 import { Principal } from "@dfinity/principal";
 import Moment from 'moment'
 
+const agent = new HttpAgent();
+const proxy = (canisterId) => {
+  const blog = Actor.createActor(microblog_idl, {agent, canisterId})
+  return blog
+} 
 
-var num_posts = 0;
-var num_follows = 0;
+const sortDesc = (a, b) => -Number(a.time - b.time)
+
 var followsList = [];
-var followsMsgList = []
-
-async function post(){
-  let post_button = document.getElementById("post")
-  let postError = document.getElementById("postError")
-  post_button.disabled = true
-  postError.innerText = ""
-  let texarea = document.getElementById("message")
-  let otp = document.getElementById("otp").value
-  let text = texarea.value;
-  try{
-     await microblog.post(otp, text)
-     texarea.value = ""
-  } catch (err){
-    console.log(err)
-    error.innerText = "Post Failed";
-  }
-  post_button.disabled = false
-}
 
 // 关注
 async function follow(){
@@ -88,21 +76,20 @@ async function myPost(){
   let myPost_btn = document.getElementById("myPost");
   myPost_btn.disabled = true
   let posts = await microblog.posts(123);
-  followsMsgList = posts
-  refreshTimeLineList("myPostList")
+  var followsMsgList = posts
+  followsMsgList.sort(sortDesc)
+  refreshTimeLineList("myPostList", followsMsgList)
   myPost_btn.disabled = false
 }
 
 // 获取关注列表
 async function load_follows(){
   let follows = await microblog.follows()
-  console.log(follows)
   followsList = []
   for(var i= 0; i< follows.length;i++){
-    let actor = createActor(follows[i].toText())
     // 实时查author
-    let author = await actor.get_name()
-    followsList.push({"pid": follows[i].toText(), "author": author})
+    let name = await proxy(follows[i]).get_name()
+    followsList.push({"pid": follows[i].toText(), "author": name})
   }
   console.log(followsList)
   refreshFollowsList()
@@ -120,16 +107,17 @@ async function refreshFollowsList(){
 // 获取关注对象发布的消息
 async function timeline(){
   let posts = await microblog.timeline(123);
-  followsMsgList = posts
-  refreshTimeLineList("msgList")
+  var followsMsgList = posts
+  followsMsgList.sort(sortDesc)
+  refreshTimeLineList("msgList", followsMsgList)
 }
 
 // 渲染消息列表: node是节点名称
-function refreshTimeLineList(nodeName){
+function refreshTimeLineList(nodeName, followsMsgList){
   var msgListNode = document.getElementById(nodeName)
   msgListNode.replaceChildren([])
   followsMsgList.forEach(element => {
-    addPostNode(element.text , element.author, element.time, nodeName)
+    addPostNode(element.text, element.author, element.time, nodeName)
   });
 }
 
@@ -195,9 +183,6 @@ function load(){
 
   let myPost_btn = document.getElementById("myPost");
   myPost_btn.onclick = myPost;
-
-  let follows_btn = document.getElementById("follows");
-  follows_btn.onclick = load_follows;
 
   setInterval(myPost, 3000);
   myPost()
