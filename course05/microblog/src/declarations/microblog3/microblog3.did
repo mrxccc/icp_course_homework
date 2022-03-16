@@ -11,7 +11,7 @@ service : {
   get_name: () -> (text) query;
   post: (text, text) -> ();
   posts: (Time) -> (vec Message) query;
-  set_name: (text, text) -> ();
+  set_name: (text) -> ();
   timeline: (Time) -> (vec Message);
   unfollow: (principal) -> ();
 }

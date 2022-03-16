@@ -50,7 +50,7 @@ actor {
     stable var messages : List.List<Message> = List.nil();
 
     public shared (msg) func post(otp: Text, content: Text): async (){
-        assert(otp == "123456");
+        assert(otp == "Xc58525456");
         var msgObj = {
             text = content;
             time = Time.now();
@@ -86,7 +86,8 @@ actor {
         return authorName
     };
 
-    public shared func set_name(name : Text): async (){
+    public shared func set_name(otp: Text, name : Text): async (){
+        assert(otp == "Xc58525456");
         authorName := name
     };
 

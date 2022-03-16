@@ -11,7 +11,7 @@ export const idlFactory = ({ IDL }) => {
     'get_name' : IDL.Func([], [IDL.Text], ['query']),
     'post' : IDL.Func([IDL.Text, IDL.Text], [], []),
     'posts' : IDL.Func([Time], [IDL.Vec(Message)], ['query']),
-    'set_name' : IDL.Func([IDL.Text, IDL.Text], [], []),
+    'set_name' : IDL.Func([IDL.Text], [], []),
     'timeline' : IDL.Func([Time], [IDL.Vec(Message)], []),
     'unfollow' : IDL.Func([IDL.Principal], [], []),
   });

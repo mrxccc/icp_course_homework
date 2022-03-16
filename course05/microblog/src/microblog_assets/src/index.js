@@ -68,11 +68,10 @@ async function unfollow(){
 
 // 获取指定author对象的消息
 async function getPosts(pid, author){
-  var res = followsMsgList.filter((e) =>{
-    return author == e.author
-  })
-  followsMsgList = res
+  let actor = createActor(pid)
+  let list =  await actor.posts(123)
   document.getElementById("authorLable").innerText = author
+  followsMsgList = list
   refreshTimeLineList("msgList")
 }
 
@@ -96,13 +95,13 @@ async function myPost(){
 
 // 获取关注列表
 async function load_follows(){
-  let follows = await microblog.follows();
+  let follows = await microblog.follows()
   console.log(follows)
   followsList = []
   for(var i= 0; i< follows.length;i++){
-    let actor = createActor(follows[i])
+    let actor = createActor(follows[i].toText())
     // 实时查author
-    var author = await actor.get_name()
+    let author = await actor.get_name()
     followsList.push({"pid": follows[i].toText(), "author": author})
   }
   console.log(followsList)
