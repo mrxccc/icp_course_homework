@@ -43,7 +43,7 @@ actor {
     };
 
     public shared query func follows(): async [Principal]{
-        List.toArray(followed)
+        List.toArray<Principal>(followed)
     };
 
     // 发布的消息

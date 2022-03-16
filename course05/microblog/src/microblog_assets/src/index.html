@@ -14,29 +14,80 @@
     <main>
       <label for="message">write something!!</label>
       <textarea id="message" ></textarea>
-      <label for="otp">OTP</label>
-      <br>
-      <input id="otp"></input>
-      <button id="post">Post</button>
-      <span id="error" style="color: red;"></span>
-      <br>
-      <label>关注列表</label>
-      <section id="follows"></section>
+      
+      <div>
+        <label for="otp">OTP</label>
+        <input id="otp"></input>
+      </div>
 
-      <label>消息列表</label>
-      <!-- 主要内容部分 -->
-      <div class="timeline-small">
-        <div class="timeline-small-body">
-            <ul id="mylist">
-              <!-- <li>
-                  <div class="bullet pink"></div>
-                  <div class="date">XXXX年XX月XX日</div>
-                  <div class="desc">
-                      <h3>内容段落1</h3>
-                      <h4>内容段落2内容段落2内容段落2内容段落2</h4>
-                  </div>
-              </li> -->
-            </ul>
+      <div>
+        <button id="post">发布消息</button>
+        <span id="postError" style="color: red;"></span>
+      </div>
+
+      <div>
+        <input id="followInput"></input>
+        <button id="follow">关注</button>
+        <span id="followError" style="color: red;"></span>
+      </div>
+
+      <div>
+        <input id="unfollowInput"></input>
+        <button id="unfollow">取消关注</button>
+        <span id="unfollowError" style="color: red;"></span>
+      </div>
+
+      <div>
+        <button id="follows">获取关注对象</button>
+        <button id="allPost">获取所有关注对象消息</button>
+        <button id="myPost">获取自己的消息列表</button>
+      </div>
+
+      <div>
+        <label>关注对象列表</label>
+        <div class="timeline-small">
+          <div class="timeline-small-body">
+              <ul id="followsList">
+              </ul>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label>我的消息列表</label>
+        <!-- 主要内容部分 -->
+        <div class="timeline-small">
+          <div class="timeline-small-body">
+              <ul id="myPostList">
+                <!-- <li>
+                    <div class="bullet pink"></div>
+                    <div class="date">XXXX年XX月XX日</div>
+                    <div class="desc">
+                        <h3>内容段落1</h3>
+                        <h4>内容段落2内容段落2内容段落2内容段落2</h4>
+                    </div>
+                </li> -->
+              </ul>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label><span id="authorLable">所有关注对象</span>的消息列表</label>
+        <!-- 主要内容部分 -->
+        <div class="timeline-small">
+          <div class="timeline-small-body">
+              <ul id="msgList">
+                <!-- <li>
+                    <div class="bullet pink"></div>
+                    <div class="date">XXXX年XX月XX日</div>
+                    <div class="desc">
+                        <h3>内容段落1</h3>
+                        <h4>内容段落2内容段落2内容段落2内容段落2</h4>
+                    </div>
+                </li> -->
+              </ul>
+          </div>
         </div>
       </div>
       <div id="postList"></div>

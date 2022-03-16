@@ -2,11 +2,17 @@ import { microblog,createActor } from "../../declarations/microblog";
 import { Principal } from "@dfinity/principal";
 import Moment from 'moment'
 
+
+var num_posts = 0;
+var num_follows = 0;
+var followsList = [];
+var followsMsgList = []
+
 async function post(){
   let post_button = document.getElementById("post")
-  let error = document.getElementById("error")
+  let postError = document.getElementById("postError")
   post_button.disabled = true
-  error.innerText = ""
+  postError.innerText = ""
   let texarea = document.getElementById("message")
   let otp = document.getElementById("otp").value
   let text = texarea.value;
@@ -20,50 +26,116 @@ async function post(){
   post_button.disabled = false
 }
 
-var num_posts = 0;
-var num_follows = 0;
-
-async function load_posts(){
-  let posts_section = document.getElementById("posts");
-  let posts= await microblog.posts(123);
-  if(num_posts == posts.length) return;
-  posts_section.replaceChildren([]);
-  num_posts = posts.length;
-  for(var i= 0; i< posts.length;i++){
-    let post = document.createElement("p");
-    post.innerText = posts[i].text + posts[i].author
-    posts_section.appendChild(post)
+// 关注
+async function follow(){
+  let follow_button = document.getElementById("follow")
+  let followError = document.getElementById("followError")
+  follow_button.disabled = true
+  followError.innerText = ""
+  let pid = document.getElementById("followInput").value
+  try{
+     var msg = await microblog.follow(Principal.fromText(pid))
+     alert(msg)
+  } catch (err){
+    console.log(err)
+    followError.innerText = "follow Failed";
   }
+  follow_button.disabled = false
+  // 关注后需要重新加载关注列表和消息列表
+  load_follows()
+  timeline()
+}
+
+// 取消关注
+async function unfollow(){
+  let unfollow_button = document.getElementById("unfollow")
+  let unfollowError = document.getElementById("unfollowError")
+  unfollow_button.disabled = true
+  unfollowError.innerText = ""
+  let pid = document.getElementById("unfollowInput").value
+  try{
+     await microblog.unfollow(Principal.fromText(pid))
+     alert("成功取消关注")
+  } catch (err){
+    console.log(err)
+    unfollowError.innerText = "unfollow Failed";
+  }
+  unfollow_button.disabled = false
+  // 关注后需要重新加载关注列表和消息列表
+  load_follows()
+  timeline()
+}
+
+// 获取指定author对象的消息
+async function getPosts(pid, author){
+  var res = followsMsgList.filter((e) =>{
+    return author == e.author
+  })
+  followsMsgList = res
+  document.getElementById("authorLable").innerText = author
+  refreshTimeLineList("msgList")
+}
+
+// 获取所有关注对象消息列表
+async function allPost(){
+  let allPost_btn = document.getElementById("allPost");
+  allPost_btn.disabled = true
+  await timeline()
+  allPost_btn.disabled = false
+}
+
+// 获取自己发布的消息列表
+async function myPost(){
+  let myPost_btn = document.getElementById("myPost");
+  myPost_btn.disabled = true
+  let posts = await microblog.posts(123);
+  followsMsgList = posts
+  refreshTimeLineList("myPostList")
+  myPost_btn.disabled = false
 }
 
 // 获取关注列表
 async function load_follows(){
-  let follows_section = document.getElementById("follows");
   let follows = await microblog.follows();
-  if(num_follows == follows.length) return;
-  follows_section.replaceChildren([]);
-  num_follows = follows.length;
+  console.log(follows)
+  followsList = []
   for(var i= 0; i< follows.length;i++){
-    let follow = document.createElement("p");
     let actor = createActor(follows[i])
+    // 实时查author
     var author = await actor.get_name()
-    console.log(author)
-    follow.innerText = "Pid:  " + follows[i].toText() + "   " + "author:   " + author
-    follows_section.appendChild(follow)
+    followsList.push({"pid": follows[i].toText(), "author": author})
+  }
+  console.log(followsList)
+  refreshFollowsList()
+}
+
+// 渲染关注列表
+async function refreshFollowsList(){
+  var followsListNode = document.getElementById("followsList")
+  followsListNode.replaceChildren([])
+  for(var i= 0; i< followsList.length;i++){
+    addFollowsNode(followsList[i].pid, followsList[i].author)
   }
 }
 
-// 返回关注对象发布的消息
+// 获取关注对象发布的消息
 async function timeline(){
   let posts = await microblog.timeline(123);
-  if(posts.length > 0){
-    posts.forEach(element => {
-      addPostNode(element.text , element.author, element.time)
-    });
-  }
+  followsMsgList = posts
+  refreshTimeLineList("msgList")
 }
 
-function addPostNode(text, author, time){
+// 渲染消息列表: node是节点名称
+function refreshTimeLineList(nodeName){
+  var msgListNode = document.getElementById(nodeName)
+  msgListNode.replaceChildren([])
+  followsMsgList.forEach(element => {
+    addPostNode(element.text , element.author, element.time, nodeName)
+  });
+}
+
+// 添加消息节点
+function addPostNode(text, author, time, nodeName){
   var node = document.createElement("LI");
   var bulletDiv = document.createElement("DIV");
   bulletDiv.setAttribute("class", "bullet pink");
@@ -84,14 +156,52 @@ function addPostNode(text, author, time){
   node.appendChild(bulletDiv)
   node.appendChild(dateDiv)
   node.appendChild(descDiv)
-  document.getElementById("mylist").appendChild(node);
+  document.getElementById(nodeName).appendChild(node);
 }
 
+// 添加关注节点
+function addFollowsNode(pid, author){
+  var node = document.createElement("LI");
+  var bulletDiv = document.createElement("DIV");
+  bulletDiv.setAttribute("class", "bullet pink");
+  var dateDiv = document.createElement("DIV");
+  dateDiv.setAttribute("class", "date");
+  dateDiv.innerText = pid
+  var descDiv = document.createElement("DIV");
+  descDiv.setAttribute("class", "desc");
+  var a = document.createElement("a");
+  a.setAttribute("style", "cursor: pointer;")
+  a.innerText = author;
+  a.onclick = function() {getPosts(pid, author)}
+  descDiv.appendChild(a);
+  node.appendChild(bulletDiv)
+  node.appendChild(dateDiv)
+  node.appendChild(descDiv)
+  document.getElementById("followsList").appendChild(node);
+}
+
+//加载文章消息
 function load(){
   let post_btn = document.getElementById("post");
   post_btn.onclick = post;
-  setInterval(load_posts, 3000);
-  load_posts()
+
+  let follow_btn = document.getElementById("follow");
+  follow_btn.onclick = follow;
+
+  let unfollow_btn = document.getElementById("unfollow");
+  unfollow_btn.onclick = unfollow;
+
+  let allPost_btn = document.getElementById("allPost");
+  allPost_btn.onclick = allPost;
+
+  let myPost_btn = document.getElementById("myPost");
+  myPost_btn.onclick = myPost;
+
+  let follows_btn = document.getElementById("follows");
+  follows_btn.onclick = load_follows;
+
+  setInterval(myPost, 3000);
+  myPost()
   load_follows()
   timeline()
 }
